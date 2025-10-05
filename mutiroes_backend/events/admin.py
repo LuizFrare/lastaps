@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     EventCategory, Event, EventParticipant, EventResource, 
-    EventPhoto, EventComment
+    EventPhoto, EventComment, EventReport
 )
 
 
@@ -82,3 +82,32 @@ class EventCommentAdmin(admin.ModelAdmin):
     def content_preview(self, obj):
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
     content_preview.short_description = 'Conteúdo'
+
+
+@admin.register(EventReport)
+class EventReportAdmin(admin.ModelAdmin):
+    list_display = ['event', 'created_by', 'total_participants', 'trash_collected_kg', 
+                   'trees_planted', 'area_cleaned_m2', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['event__title', 'created_by__username', 'summary']
+    raw_id_fields = ['event', 'created_by']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Informações Básicas', {
+            'fields': ('event', 'created_by')
+        }),
+        ('Estatísticas', {
+            'fields': ('total_participants', 'total_hours')
+        }),
+        ('Impacto Ambiental', {
+            'fields': ('trash_collected_kg', 'trees_planted', 'area_cleaned_m2', 'recyclable_material_kg')
+        }),
+        ('Descrições', {
+            'fields': ('summary', 'challenges', 'achievements')
+        }),
+        ('Metadados', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
