@@ -1,0 +1,69 @@
+version: "3.8"
+
+services:
+  # Backend Django
+  backend:
+    build: ./mutiroes_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mutiroes_backend:/app
+      - ./mutiroes_backend/media:/app/media
+      - ./mutiroes_backend/staticfiles:/app/staticfiles
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-development-key
+      - DATABASE_URL=sqlite:///db.sqlite3
+    depends_on:
+      - redis
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Frontend Next.js
+  frontend:
+    build: ./mutiroes-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mutiroes-frontend:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Celery Worker
+  celery:
+    build: ./mutiroes_backend
+    volumes:
+      - ./mutiroes_backend:/app
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-development-key
+      - DATABASE_URL=sqlite:///db.sqlite3
+    depends_on:
+      - redis
+    command: celery -A mutiroes_backend worker -l info
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build: ./mutiroes_backend
+    volumes:
+      - ./mutiroes_backend:/app
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-development-key
+      - DATABASE_URL=sqlite:///db.sqlite3
+    depends_on:
+      - redis
+    command: celery -A mutiroes_backend beat -l info
+
+volumes:
+  redis_data:
