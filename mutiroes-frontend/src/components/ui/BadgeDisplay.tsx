@@ -257,3 +257,5 @@ export function BadgeGrid({ badges, title, className = '' }: BadgeGridProps) {
     </div>
   )
 }
+
+

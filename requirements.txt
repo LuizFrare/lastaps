@@ -9,3 +9,22 @@ redis==5.0.1
 firebase-admin==6.2.0
 django-extensions==3.2.3
 python-decouple==3.8
+
+# Production Server
+gunicorn==21.2.0
+
+# PostgreSQL
+psycopg2-binary==2.9.9
+
+# Celery Beat
+django-celery-beat==2.5.0
+
+# Monitoring
+flower==2.0.1
+
+# Circuit Breaker & Resilience
+tenacity==8.2.3
+pybreaker==1.0.1
+
+# Service Discovery
+python-consul==1.1.0

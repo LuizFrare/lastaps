@@ -1,0 +1,32 @@
+{
+  "datacenter": "dc1",
+  "data_dir": "/consul/data",
+  "log_level": "INFO",
+  "node_name": "consul-server",
+  "server": true,
+  "bootstrap_expect": 1,
+  "ui": true,
+  "client_addr": "0.0.0.0",
+  "ports": {
+    "dns": 8600,
+    "http": 8500,
+    "https": -1,
+    "grpc": 8502
+  },
+  "services": [
+    {
+      "id": "api-gateway",
+      "name": "api-gateway",
+      "tags": ["nginx", "gateway", "load-balancer"],
+      "port": 80,
+      "check": {
+        "http": "http://api-gateway/health",
+        "interval": "10s",
+        "timeout": "2s"
+      }
+    }
+  ],
+  "connect": {
+    "enabled": true
+  }
+}

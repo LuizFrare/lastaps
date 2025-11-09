@@ -23,12 +23,18 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from users.serializers import CustomTokenObtainPairSerializer
+from .health import health_check, readiness_check, liveness_check
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # Health check endpoints
+    path('health/', health_check, name='health_check'),
+    path('readiness/', readiness_check, name='readiness_check'),
+    path('liveness/', liveness_check, name='liveness_check'),
     
     # API URLs
     path('api/auth/', include('rest_framework.urls')),
