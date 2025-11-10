@@ -49,6 +49,7 @@ docker-compose ps
 ```
 
 **Saída esperada:**
+
 ```
 NAME                     STATUS                PORTS
 mutiroes-backend         Up (healthy)          0.0.0.0:8000->8000/tcp
@@ -185,23 +186,25 @@ docker-compose down -v --rmi local
 
 Após subir os containers, você pode acessar:
 
-- **API**: http://localhost:8000/api/
-- **Admin Django**: http://localhost:8000/admin/
-- **Health Check**: http://localhost:8000/health/
-- **Eventos**: http://localhost:8000/api/events/
-- **Usuários**: http://localhost:8000/api/users/
-- **Token JWT**: http://localhost:8000/api/token/
+- **API**: <http://localhost:8000/api/>
+- **Admin Django**: <http://localhost:8000/admin/>
+- **Health Check**: <http://localhost:8000/health/>
+- **Eventos**: <http://localhost:8000/api/events/>
+- **Usuários**: <http://localhost:8000/api/users/>
+- **Token JWT**: <http://localhost:8000/api/token/>
 
 ## ⚠️ Notas Importantes
 
 1. **Banco de dados**: Atualmente usando SQLite (arquivo `db.sqlite3`). Para produção, migre para PostgreSQL.
 
 2. **Migrações**: Na primeira execução, as migrações são executadas automaticamente pelo comando:
+
    ```yaml
    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
    ```
 
 3. **Dados de teste**: Para popular o banco com dados de exemplo:
+
    ```bash
    docker-compose exec backend python populate_data.py
    ```

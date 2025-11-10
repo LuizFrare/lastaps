@@ -51,43 +51,43 @@ Facilitar a organização de eventos de limpeza, plantio e monitoramento cidadã
 ### Backend
 
 - Django 4.2.7
-- Django REST Framework
-- JWT Authentication
-- Celery (tasks assíncronas)
-- Redis (cache e broker)
-- Firebase Admin SDK
-- PostGIS (geoprocessamento)
+- Django REST Framework 3.14.0
+- JWT Authentication (djangorestframework-simplejwt)
+- Celery 5.3.4 (tarefas assíncronas)
+- Redis 7 (cache e message broker)
+- PostgreSQL (produção) / SQLite (desenvolvimento)
+- Gunicorn (servidor WSGI para produção)
 
 ### Frontend
 
-- Next.js 15
-- React 18
-- TypeScript
-- Tailwind CSS
-- Heroicons
-- Framer Motion
-- React Hook Form
+- Next.js 15.5.4
+- React 19.1.0
+- TypeScript 5
+- Tailwind CSS 3.4.18
+- Heroicons (ícones)
 
 ## 📁 Estrutura do Projeto
 
 ```
 lastaps/
 ├── mutiroes_backend/          # Backend Django
-│   ├── events/                # App de eventos
-│   ├── users/                 # App de usuários
-│   ├── notifications/         # App de notificações
-│   └── geoprocessing/         # App de geoprocessamento
+│   ├── events/                # App de eventos (funcional)
+│   ├── users/                 # App de usuários (funcional)
+│   └── mutiroes_backend/      # Configurações Django
 ├── mutiroes-frontend/         # Frontend Next.js
 │   ├── src/
 │   │   ├── app/              # Páginas da aplicação
 │   │   ├── components/       # Componentes reutilizáveis
-│   │   └── lib/              # Utilitários
+│   │   ├── contexts/         # Contextos React (Auth)
+│   │   ├── hooks/            # Custom hooks
+│   │   └── lib/              # Utilitários e API client
+├── docker-compose.yml         # Orquestração Docker
 └── README.md
 ```
 
 ## 🎨 Design System
 
-O frontend segue rigorosamente o **Apple Human Interface Guidelines**:
+O frontend segue o **Apple Human Interface Guidelines**:
 
 ### Cores
 
@@ -98,7 +98,7 @@ O frontend segue rigorosamente o **Apple Human Interface Guidelines**:
 
 ### Tipografia
 
-- **Fonte Principal**: SF Pro Display/Text
+- **Fonte Principal**: SF Pro Display/Text (fallback: system-ui)
 - **Escala**: Large Title, Title 1-3, Headline, Body, Callout, etc.
 
 ### Componentes
