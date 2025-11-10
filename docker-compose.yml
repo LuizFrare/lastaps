@@ -1,32 +1,139 @@
 services:
-  # Backend Django API
-  backend:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: mutiroes-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=mutiroes_db
+      - POSTGRES_USER=mutiroes_user
+      - POSTGRES_PASSWORD=mutiroes_pass_2024_secure
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mutiroes_user -d mutiroes_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Django API - Replica 1
+  backend1:
     build:
       context: .
       dockerfile: ./mutiroes_backend/Dockerfile
-    container_name: mutiroes-backend
-    ports:
-      - "8000:8000"
+    container_name: mutiroes-backend1
     volumes:
       - ./mutiroes_backend:/app
       - backend_media:/app/media
       - backend_static:/app/staticfiles
     environment:
-      - DEBUG=True
+      - DEBUG=False
       - SECRET_KEY=django-insecure-development-key-change-in-production
-      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend
-      - DATABASE_URL=sqlite:///db.sqlite3
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend1,backend2,backend3,nginx
+      - DATABASE_URL=postgresql://mutiroes_user:mutiroes_pass_2024_secure@postgres:5432/mutiroes_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             python manage.py runserver 0.0.0.0:8000"
+             gunicorn mutiroes_backend.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60 --log-level info"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend Django API - Replica 2
+  backend2:
+    build:
+      context: .
+      dockerfile: ./mutiroes_backend/Dockerfile
+    container_name: mutiroes-backend2
+    volumes:
+      - ./mutiroes_backend:/app
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=django-insecure-development-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend1,backend2,backend3,nginx
+      - DATABASE_URL=postgresql://mutiroes_user:mutiroes_pass_2024_secure@postgres:5432/mutiroes_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             gunicorn mutiroes_backend.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60 --log-level info"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend Django API - Replica 3
+  backend3:
+    build:
+      context: .
+      dockerfile: ./mutiroes_backend/Dockerfile
+    container_name: mutiroes-backend3
+    volumes:
+      - ./mutiroes_backend:/app
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=django-insecure-development-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend1,backend2,backend3,nginx
+      - DATABASE_URL=postgresql://mutiroes_user:mutiroes_pass_2024_secure@postgres:5432/mutiroes_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             gunicorn mutiroes_backend.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 60 --log-level info"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx - Load Balancer
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: mutiroes-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - backend_media:/app/media:ro
+      - backend_static:/app/staticfiles:ro
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -39,32 +146,62 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --appendonly yes --appendfsync everysec --save 60 1000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Celery Worker - Asynchronous Tasks
-  celery-worker:
+  # Celery Worker 1 - Asynchronous Tasks
+  celery-worker1:
     build:
       context: .
       dockerfile: ./mutiroes_backend/Dockerfile
-    container_name: mutiroes-celery-worker
+    container_name: mutiroes-celery-worker1
     volumes:
       - ./mutiroes_backend:/app
       - backend_media:/app/media
     environment:
-      - DEBUG=True
+      - DEBUG=False
       - SECRET_KEY=django-insecure-development-key-change-in-production
-      - DATABASE_URL=sqlite:///db.sqlite3
+      - DATABASE_URL=postgresql://mutiroes_user:mutiroes_pass_2024_secure@postgres:5432/mutiroes_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - redis
-      - backend
-    command: celery -A mutiroes_backend worker -l info --concurrency=2
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      backend1:
+        condition: service_started
+    command: celery -A mutiroes_backend worker -l info --concurrency=4 --max-tasks-per-child=1000
+    restart: unless-stopped
+
+  # Celery Worker 2 - Asynchronous Tasks
+  celery-worker2:
+    build:
+      context: .
+      dockerfile: ./mutiroes_backend/Dockerfile
+    container_name: mutiroes-celery-worker2
+    volumes:
+      - ./mutiroes_backend:/app
+      - backend_media:/app/media
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=django-insecure-development-key-change-in-production
+      - DATABASE_URL=postgresql://mutiroes_user:mutiroes_pass_2024_secure@postgres:5432/mutiroes_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      backend1:
+        condition: service_started
+    command: celery -A mutiroes_backend worker -l info --concurrency=4 --max-tasks-per-child=1000
     restart: unless-stopped
 
   # Celery Beat - Task Scheduler
@@ -76,18 +213,24 @@ services:
     volumes:
       - ./mutiroes_backend:/app
     environment:
-      - DEBUG=True
+      - DEBUG=False
       - SECRET_KEY=django-insecure-development-key-change-in-production
-      - DATABASE_URL=sqlite:///db.sqlite3
+      - DATABASE_URL=postgresql://mutiroes_user:mutiroes_pass_2024_secure@postgres:5432/mutiroes_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      backend1:
+        condition: service_started
     command: celery -A mutiroes_backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     restart: unless-stopped
 
 volumes:
+  postgres_data:
+    driver: local
   redis_data:
     driver: local
   backend_media:

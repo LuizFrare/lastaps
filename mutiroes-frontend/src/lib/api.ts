@@ -51,13 +51,26 @@ class ApiClient {
       const response = await fetch(url, config)
       console.log('📥 Resposta recebida:', response.status, response.statusText)
 
-      const data = await response.json()
-      console.log('📊 Dados parseados:', data)
+      let data
+      try {
+        data = await response.json()
+        console.log('📊 Dados parseados:', data)
+      } catch (parseError) {
+        // Se não conseguir fazer parse do JSON, retorna resposta vazia
+        console.log('⚠️ Resposta sem JSON body')
+        data = {}
+      }
 
       if (!response.ok) {
-        throw new Error(
-          data.message || `HTTP error! status: ${response.status}`
-        )
+        const apiError: ApiError = {
+          message: data.message || `HTTP error! status: ${response.status}`,
+          status: response.status,
+          details: data,
+        }
+        const error: any = new Error(apiError.message)
+        error.response = { data, status: response.status }
+        error.status = response.status
+        throw error
       }
 
       return {
@@ -103,6 +116,7 @@ class ApiClient {
     username: string
     email: string
     password: string
+    password_confirm: string
     first_name: string
     last_name: string
   }) {

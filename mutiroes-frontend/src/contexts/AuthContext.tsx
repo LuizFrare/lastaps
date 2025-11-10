@@ -121,18 +121,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Extrair mensagem de erro específica do backend
       let errorMessage = 'Erro ao criar conta'
 
+      // Tentar extrair detalhes do erro
       if (error.response?.data) {
         const data = error.response.data
         // Se houver erros de campo específicos
         if (data.email) {
-          errorMessage = `Email: ${data.email[0]}`
+          errorMessage = `Email: ${Array.isArray(data.email) ? data.email[0] : data.email}`
         } else if (data.username) {
-          errorMessage = `Usuário: ${data.username[0]}`
+          errorMessage = `Usuário: ${Array.isArray(data.username) ? data.username[0] : data.username}`
         } else if (data.password) {
-          errorMessage = `Senha: ${data.password[0]}`
+          errorMessage = `Senha: ${Array.isArray(data.password) ? data.password[0] : data.password}`
         } else if (typeof data === 'string') {
           errorMessage = data
+        } else if (data.detail) {
+          errorMessage = data.detail
         }
+      } else if (error.message && !error.message.includes('HTTP error')) {
+        errorMessage = error.message
       }
 
       const enhancedError = new Error(errorMessage)

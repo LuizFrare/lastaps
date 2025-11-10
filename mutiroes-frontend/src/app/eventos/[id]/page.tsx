@@ -6,9 +6,7 @@ import {
   MapPinIcon,
   CalendarIcon,
   UsersIcon,
-  HeartIcon,
   ShareIcon,
-  PhotoIcon,
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline'
@@ -85,6 +83,26 @@ export default function EventDetailPage() {
       alert(
         'Erro ao fazer check-in. Verifique se você está no local do evento.'
       )
+    }
+  }
+
+  const handleShare = async () => {
+    const shareData = {
+      title: event.title,
+      text: `Confira este evento: ${event.title}`,
+      url: window.location.href,
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback: copiar para área de transferência
+        await navigator.clipboard.writeText(window.location.href)
+        alert('Link copiado para a área de transferência!')
+      }
+    } catch (error) {
+      console.error('Erro ao compartilhar:', error)
     }
   }
 
@@ -189,13 +207,9 @@ export default function EventDetailPage() {
               ← Voltar
             </Button>
             <div className='flex space-x-2'>
-              <Button variant='outline' size='sm'>
+              <Button variant='outline' size='sm' onClick={handleShare}>
                 <ShareIcon className='h-4 w-4 mr-2' />
                 Compartilhar
-              </Button>
-              <Button variant='outline' size='sm'>
-                <HeartIcon className='h-4 w-4 mr-2' />
-                Favoritar
               </Button>
             </div>
           </div>
@@ -418,11 +432,11 @@ export default function EventDetailPage() {
                 <CardTitle className='text-lg'>Ações Rápidas</CardTitle>
               </CardHeader>
               <CardContent className='space-y-2'>
-                <Button variant='outline' className='w-full justify-start'>
-                  <PhotoIcon className='h-4 w-4 mr-2' />
-                  Ver Fotos
-                </Button>
-                <Button variant='outline' className='w-full justify-start'>
+                <Button 
+                  variant='outline' 
+                  className='w-full justify-start'
+                  onClick={handleShare}
+                >
                   <ShareIcon className='h-4 w-4 mr-2' />
                   Compartilhar
                 </Button>

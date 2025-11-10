@@ -19,19 +19,29 @@ def create_test_data():
     
     # Criar categorias
     categories = [
-        {'name': 'Limpeza', 'description': 'Eventos de limpeza de praias, rios e áreas urbanas'},
-        {'name': 'Plantio', 'description': 'Eventos de plantio de árvores e reflorestamento'},
-        {'name': 'Monitoramento', 'description': 'Eventos de monitoramento ambiental'},
-        {'name': 'Educação', 'description': 'Eventos de educação ambiental'},
+        {"name": "Limpeza de Praias", "description": "Mutirões de limpeza de praias e orlas marítimas", "icon": "🏖️", "color": "#0EA5E9"},
+        {"name": "Limpeza de Rios", "description": "Limpeza e preservação de rios e córregos", "icon": "🌊", "color": "#06B6D4"},
+        {"name": "Plantio de Árvores", "description": "Reflorestamento e plantio de mudas", "icon": "🌳", "color": "#10B981"},
+        {"name": "Limpeza de Parques", "description": "Manutenção e limpeza de parques e áreas verdes urbanas", "icon": "🏞️", "color": "#22C55E"},
+        {"name": "Reciclagem", "description": "Coleta seletiva e projetos de reciclagem", "icon": "♻️", "color": "#84CC16"},
+        {"name": "Educação Ambiental", "description": "Palestras, workshops e atividades educativas", "icon": "📚", "color": "#F59E0B"},
+        {"name": "Limpeza Urbana", "description": "Limpeza de ruas, calçadas e espaços públicos", "icon": "🏙️", "color": "#EF4444"},
+        {"name": "Proteção Animal", "description": "Cuidado e proteção da fauna local", "icon": "🦜", "color": "#8B5CF6"},
+        {"name": "Hortas Comunitárias", "description": "Criação e manutenção de hortas comunitárias", "icon": "🌱", "color": "#14B8A6"},
+        {"name": "Preservação de Mangues", "description": "Conservação e recuperação de manguezais", "icon": "🌿", "color": "#059669"}
     ]
     
-    created_categories = []
+    created_categories = {}
     for cat_data in categories:
         category, created = EventCategory.objects.get_or_create(
             name=cat_data['name'],
-            defaults={'description': cat_data['description']}
+            defaults={
+                'description': cat_data['description'],
+                'icon': cat_data.get('icon', ''),
+                'color': cat_data.get('color', '#007AFF')
+            }
         )
-        created_categories.append(category)
+        created_categories[cat_data['name']] = category
         print(f"Categoria '{category.name}' {'criada' if created else 'já existe'}")
     
     # Criar usuários de teste
@@ -94,87 +104,79 @@ def create_test_data():
     events_data = [
         {
             'title': 'Limpeza da Praia de Copacabana',
-            'description': 'Vamos limpar a praia mais famosa do Rio de Janeiro e conscientizar os banhistas sobre a importância de preservar nossos oceanos. Traga sua família e amigos para fazer a diferença!',
+            'description': 'Mutirão de limpeza na icônica praia de Copacabana. Vamos coletar lixo e conscientizar sobre a preservação marinha.',
             'start_date': now + timedelta(days=7),
             'end_date': now + timedelta(days=7, hours=4),
             'registration_deadline': now + timedelta(days=5),
-            'address': 'Praia de Copacabana, Rio de Janeiro, RJ',
+            'address': 'Praia de Copacabana, Rio de Janeiro - RJ',
             'city': 'Rio de Janeiro',
             'state': 'RJ',
             'latitude': -22.9711,
             'longitude': -43.1822,
             'max_participants': 50,
-            'category': created_categories[0],  # Limpeza
-            'organizer': created_users[1],  # Maria Silva
+            'min_age': 16,
+            'category': created_categories.get('Limpeza de Praias'),
+            'organizer': created_users[1],
             'status': 'published',
             'is_public': True,
             'requires_approval': False,
-            'required_tools': 'Luvas, sacos de lixo, protetor solar',
-            'provided_tools': 'Luvas, sacos de lixo, água',
-            'what_to_bring': 'Roupa confortável, protetor solar, garrafa de água'
         },
         {
             'title': 'Plantio de Mudas no Parque Ibirapuera',
-            'description': 'Ajude a reflorestar o Parque Ibirapuera plantando mudas de árvores nativas da Mata Atlântica. Vamos plantar 200 mudas de árvores nativas.',
+            'description': 'Participe do plantio de árvores nativas no Parque Ibirapuera. Contribua para um São Paulo mais verde!',
+            'start_date': now + timedelta(days=14),
+            'end_date': now + timedelta(days=14, hours=3),
+            'registration_deadline': now + timedelta(days=12),
+            'address': 'Parque Ibirapuera, São Paulo - SP',
+            'city': 'São Paulo',
+            'state': 'SP',
+            'latitude': -23.5875,
+            'longitude': -46.6572,
+            'max_participants': 30,
+            'min_age': 14,
+            'category': created_categories.get('Plantio de Árvores'),
+            'organizer': created_users[2],
+            'status': 'published',
+            'is_public': True,
+            'requires_approval': False,
+        },
+        {
+            'title': 'Limpeza do Rio Pinheiros',
+            'description': 'Ação de limpeza e conscientização nas margens do Rio Pinheiros. Juntos pela revitalização do rio!',
+            'start_date': now + timedelta(days=21),
+            'end_date': now + timedelta(days=21, hours=5),
+            'registration_deadline': now + timedelta(days=18),
+            'address': 'Marginal Pinheiros, São Paulo - SP',
+            'city': 'São Paulo',
+            'state': 'SP',
+            'latitude': -23.6065,
+            'longitude': -46.6962,
+            'max_participants': 40,
+            'min_age': 18,
+            'category': created_categories.get('Limpeza de Rios'),
+            'organizer': created_users[3],
+            'status': 'published',
+            'is_public': True,
+            'requires_approval': False,
+        },
+        {
+            'title': 'Revitalização do Parque da Cidade',
+            'description': 'Mutirão de limpeza e manutenção do Parque da Cidade. Vamos melhorar este espaço para todos!',
             'start_date': now + timedelta(days=10),
             'end_date': now + timedelta(days=10, hours=4),
             'registration_deadline': now + timedelta(days=8),
-            'address': 'Parque Ibirapuera, São Paulo, SP',
-            'city': 'São Paulo',
-            'state': 'SP',
-            'latitude': -23.5874,
-            'longitude': -46.6576,
-            'max_participants': 40,
-            'category': created_categories[1],  # Plantio
-            'organizer': created_users[2],  # João Santos
-            'status': 'published',
-            'is_public': True,
-            'requires_approval': False,
-            'required_tools': 'Pá, enxada, luvas',
-            'provided_tools': 'Mudas, ferramentas, água',
-            'what_to_bring': 'Roupa confortável, protetor solar, garrafa de água'
-        },
-        {
-            'title': 'Monitoramento da Qualidade do Ar',
-            'description': 'Participe da coleta de dados sobre a qualidade do ar em diferentes pontos da cidade para análise científica.',
-            'start_date': now + timedelta(days=14),
-            'end_date': now + timedelta(days=14, hours=4),
-            'registration_deadline': now + timedelta(days=12),
-            'address': 'Centro de Belo Horizonte, MG',
-            'city': 'Belo Horizonte',
-            'state': 'MG',
-            'latitude': -19.9167,
-            'longitude': -43.9345,
-            'max_participants': 25,
-            'category': created_categories[2],  # Monitoramento
-            'organizer': created_users[3],  # Ana Costa
-            'status': 'published',
-            'is_public': True,
-            'requires_approval': False,
-            'required_tools': 'Smartphone com GPS',
-            'provided_tools': 'Equipamentos de medição, planilhas',
-            'what_to_bring': 'Smartphone carregado, roupa confortável'
-        },
-        {
-            'title': 'Limpeza do Rio Tietê',
-            'description': 'Ajude a limpar as margens do Rio Tietê e conscientizar a população sobre a importância de preservar nossos rios.',
-            'start_date': now + timedelta(days=21),
-            'end_date': now + timedelta(days=21, hours=4),
-            'registration_deadline': now + timedelta(days=19),
-            'address': 'Margem do Rio Tietê, São Paulo, SP',
-            'city': 'São Paulo',
-            'state': 'SP',
-            'latitude': -23.5505,
-            'longitude': -46.6333,
+            'address': 'Parque da Cidade, Brasília - DF',
+            'city': 'Brasília',
+            'state': 'DF',
+            'latitude': -15.8267,
+            'longitude': -47.9218,
             'max_participants': 35,
-            'category': created_categories[0],  # Limpeza
-            'organizer': created_users[1],  # Maria Silva
+            'min_age': 16,
+            'category': created_categories.get('Limpeza de Parques'),
+            'organizer': created_users[1],
             'status': 'published',
             'is_public': True,
             'requires_approval': False,
-            'required_tools': 'Luvas, botas, protetor solar',
-            'provided_tools': 'Luvas, sacos de lixo, água, lanche',
-            'what_to_bring': 'Roupa confortável, protetor solar, garrafa de água'
         }
     ]
     
