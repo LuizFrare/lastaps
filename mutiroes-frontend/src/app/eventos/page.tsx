@@ -4,26 +4,16 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import {
   MagnifyingGlassIcon,
-  FunnelIcon,
   MapPinIcon,
   CalendarIcon,
   UsersIcon,
-  ClockIcon,
-  HeartIcon,
-  ShareIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
-import { formatDate, formatTime, formatRelativeTime } from '@/lib/utils'
+import { formatDate, formatTime } from '@/lib/utils'
 import { api } from '@/lib/api'
 import { useGeolocation } from '@/hooks/useGeolocation'
 
@@ -32,17 +22,11 @@ export default function EventosPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('distance')
   const [events, setEvents] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const { latitude, longitude } = useGeolocation()
-
-  const categories = [
-    { id: 'all', name: 'Todos', count: 24 },
-    { id: 'limpeza', name: 'Limpeza', count: 12 },
-    { id: 'plantio', name: 'Plantio', count: 8 },
-    { id: 'monitoramento', name: 'Monitoramento', count: 4 },
-  ]
 
   // Função para calcular distância usando fórmula de Haversine
   const calculateDistance = (
@@ -63,6 +47,26 @@ export default function EventosPage() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     return R * c
   }
+
+  // Load categories
+  const fetchCategories = React.useCallback(async () => {
+    try {
+      const response = await api.getCategories()
+      const categoriesData = Array.isArray(response.data)
+        ? response.data
+        : response.data.results || []
+
+      // Adicionar categoria "Todos"
+      const allCategories = [
+        { id: 'all', name: 'Todos', event_count: events.length },
+        ...categoriesData,
+      ]
+      setCategories(allCategories)
+    } catch (error: any) {
+      console.error('❌ Error fetching categories:', error)
+      setCategories([{ id: 'all', name: 'Todos', event_count: events.length }])
+    }
+  }, [events.length])
 
   // Load events on component mount
   const fetchEvents = React.useCallback(async () => {
@@ -90,6 +94,12 @@ export default function EventosPage() {
     fetchEvents()
   }, [fetchEvents])
 
+  React.useEffect(() => {
+    if (events.length > 0) {
+      fetchCategories()
+    }
+  }, [events.length, fetchCategories])
+
   // Recarregar eventos quando a página recebe foco
   React.useEffect(() => {
     const handleFocus = () => {
@@ -108,8 +118,22 @@ export default function EventosPage() {
       event.address.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory =
       selectedCategory === 'all' ||
-      event.category.name.toLowerCase() === selectedCategory
+      event.category?.id === parseInt(selectedCategory) ||
+      event.category?.name.toLowerCase() === selectedCategory.toLowerCase()
     return matchesSearch && matchesCategory
+  })
+
+  // Calcular contadores dinâmicos das categorias
+  const categoriesWithCount = categories.map(cat => {
+    if (cat.id === 'all') {
+      return { ...cat, count: events.length }
+    }
+    const count = events.filter(
+      event =>
+        event.category?.id === cat.id ||
+        event.category?.name.toLowerCase() === cat.name.toLowerCase()
+    ).length
+    return { ...cat, count }
   })
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
@@ -194,12 +218,12 @@ export default function EventosPage() {
 
             {/* Category Filter */}
             <div className='flex gap-2 overflow-x-auto'>
-              {categories.map(category => (
+              {categoriesWithCount.map(category => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={() => setSelectedCategory(String(category.id))}
                   className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
-                    selectedCategory === category.id
+                    selectedCategory === String(category.id)
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
@@ -243,19 +267,11 @@ export default function EventosPage() {
                 <Badge variant='primary' className='absolute top-4 left-4'>
                   {event.category?.name || 'Geral'}
                 </Badge>
-                <div className='absolute top-4 right-4 flex space-x-2'>
-                  <button className='p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors duration-200'>
-                    <HeartIcon className='h-4 w-4 text-white' />
-                  </button>
-                  <button className='p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors duration-200'>
-                    <ShareIcon className='h-4 w-4 text-white' />
-                  </button>
-                </div>
                 <div className='absolute bottom-4 right-4 text-white'>
                   <div className='flex items-center space-x-1'>
                     <UsersIcon className='h-4 w-4' />
                     <span className='text-sm font-medium'>
-                      {event.participants}/{event.maxParticipants}
+                      {event.participants_count || 0}/{event.max_participants}
                     </span>
                   </div>
                 </div>
@@ -317,28 +333,14 @@ export default function EventosPage() {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className='flex space-x-2'>
-                  <Link href={`/eventos/${event.id}`} className='flex-1'>
-                    <Button className='w-full'>Participar</Button>
-                  </Link>
-                  <Button variant='outline' size='icon'>
-                    <HeartIcon className='h-4 w-4' />
-                  </Button>
-                </div>
+                {/* Action Button */}
+                <Link href={`/eventos/${event.id}`} className='block'>
+                  <Button className='w-full'>Ver Detalhes</Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {/* Load More */}
-        {sortedEvents.length > 0 && (
-          <div className='text-center mt-12'>
-            <Button variant='outline' size='lg'>
-              Carregar Mais Eventos
-            </Button>
-          </div>
-        )}
 
         {/* Empty State */}
         {sortedEvents.length === 0 && (
