@@ -110,7 +110,24 @@ O frontend segue o **Apple Human Interface Guidelines**:
 
 ## 🚀 Como Executar
 
-### Backend
+### Opção 1: Docker (Recomendado)
+
+```bash
+# Subir todos os serviços (backend + redis + celery)
+docker-compose up -d --build
+
+# Ver logs
+docker-compose logs -f
+
+# Parar serviços
+docker-compose down
+```
+
+Veja o [README-DOCKER.md](./README-DOCKER.md) para mais detalhes.
+
+### Opção 2: Local
+
+#### Backend
 
 ```bash
 cd mutiroes_backend
@@ -123,7 +140,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-### Frontend
+#### Frontend
 
 ```bash
 cd mutiroes-frontend
@@ -134,10 +151,9 @@ npm run dev
 ## 📱 Funcionalidades Mobile
 
 - **Design responsivo** para todos os dispositivos
-- **Geolocalização** para encontrar eventos próximos
-- **Notificações push** para lembretes de eventos
-- **Check-in** com GPS para validação de presença
-- **Câmera integrada** para fotos antes/depois
+- **Geolocalização** para encontrar eventos próximos via API nativa do navegador
+- **Check-in** para validação de presença em eventos
+- **Câmera integrada** para compartilhar fotos dos eventos
 
 ## 🔧 Configuração
 
@@ -148,16 +164,16 @@ npm run dev
 ```env
 SECRET_KEY=your-secret-key
 DEBUG=True
-FIREBASE_CREDENTIALS_PATH=path/to/firebase-credentials.json
-FIREBASE_PROJECT_ID=your-project-id
+DATABASE_URL=sqlite:///db.sqlite3
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
 #### Frontend (.env.local)
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
-NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+```
 ```
 
 ## 📊 Métricas e Impacto
