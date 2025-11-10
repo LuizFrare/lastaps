@@ -34,7 +34,7 @@ export default function EventosPage() {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   const { latitude, longitude } = useGeolocation()
 
   const categories = [
@@ -45,15 +45,22 @@ export default function EventosPage() {
   ]
 
   // Função para calcular distância usando fórmula de Haversine
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const R = 6371 // Raio da Terra em km
-    const dLat = (lat2 - lat1) * Math.PI / 180
-    const dLon = (lon2 - lon1) * Math.PI / 180
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const dLat = ((lat2 - lat1) * Math.PI) / 180
+    const dLon = ((lon2 - lon1) * Math.PI) / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     return R * c
   }
 
@@ -65,7 +72,8 @@ export default function EventosPage() {
       console.log('🔄 Carregando eventos...')
       const response = await api.getEvents()
       console.log('📦 Resposta da API:', response)
-      const eventsData = (response.data as { results?: any[] }).results ||
+      const eventsData =
+        (response.data as { results?: any[] }).results ||
         (response.data as any[])
       console.log('✅ Eventos carregados:', eventsData.length)
       setEvents(eventsData)
@@ -109,24 +117,38 @@ export default function EventosPage() {
       case 'distance':
         // Se não houver geolocalização, ordenar por data
         if (!latitude || !longitude) {
-          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+          return (
+            new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+          )
         }
         // Verificar se os eventos têm coordenadas válidas
         const hasACoords = a.latitude && a.longitude
         const hasBCoords = b.latitude && b.longitude
-        
+
         // Se nenhum tem coordenadas, ordenar por data
         if (!hasACoords && !hasBCoords) {
-          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+          return (
+            new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+          )
         }
         // Se apenas A tem coordenadas, A vem primeiro
         if (hasACoords && !hasBCoords) return -1
         // Se apenas B tem coordenadas, B vem primeiro
         if (!hasACoords && hasBCoords) return 1
-        
+
         // Ambos têm coordenadas, calcular distância
-        const distA = calculateDistance(latitude, longitude, a.latitude, a.longitude)
-        const distB = calculateDistance(latitude, longitude, b.latitude, b.longitude)
+        const distA = calculateDistance(
+          latitude,
+          longitude,
+          a.latitude,
+          a.longitude
+        )
+        const distB = calculateDistance(
+          latitude,
+          longitude,
+          b.latitude,
+          b.longitude
+        )
         return distA - distB
       case 'date':
         return (

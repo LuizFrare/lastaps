@@ -1,6 +1,6 @@
 # Mutirões - Plataforma de Apoio a Ações Comunitárias
 
-Uma plataforma completa para organização e participação em mutirões e ações ambientais comunitárias, desenvolvida seguindo as melhores práticas de design e arquitetura.
+Uma plataforma para organização e participação em mutirões e ações ambientais comunitárias.
 
 ## 🎯 Objetivo
 
@@ -10,19 +10,18 @@ Facilitar a organização de eventos de limpeza, plantio e monitoramento cidadã
 
 ### Backend (Django/DRF)
 
-- **API RESTful** com autenticação JWT
+- **API RESTful** completa com autenticação JWT
 - **Banco de dados** SQLite (desenvolvimento) / PostgreSQL (produção)
-- **Notificações push** via Firebase Cloud Messaging
-- **Microserviço de geoprocessamento** para agrupar eventos por área
-- **Sistema de badges** e gamificação
+- **Sistema de tarefas assíncronas** com Celery + Redis
+- **Gestão de eventos, participantes e recursos**
+- **Sistema de relatórios de impacto**
 
 ### Frontend (Next.js/React)
 
 - **Design System** baseado no Apple Human Interface Guidelines
 - **Interface responsiva** com Tailwind CSS
-- **Componentes reutilizáveis** seguindo padrões da Apple
-- **Geolocalização** para eventos próximos
-- **Sistema de notificações** em tempo real
+- **Componentes reutilizáveis** seguindo padrões modernos
+- **Geolocalização** para eventos próximos via API nativa do navegador
 
 ## 🚀 Funcionalidades
 
@@ -30,23 +29,22 @@ Facilitar a organização de eventos de limpeza, plantio e monitoramento cidadã
 
 - ✅ Criação e gestão de eventos
 - ✅ Controle de participantes e recursos
-- ✅ Relatórios de impacto
-- ✅ Sistema de check-in com geolocalização
+- ✅ Relatórios de impacto ambiental
+- ✅ Sistema de check-in para presença
 
 ### Para Voluntários
 
 - ✅ Descoberta de eventos próximos
 - ✅ Inscrição em eventos
-- ✅ Sistema de badges e conquistas
 - ✅ Histórico de participação
-- ✅ Compartilhamento de fotos antes/depois
+- ✅ Compartilhamento de fotos dos eventos
+- ✅ Comentários em eventos
 
 ### Para a Comunidade
 
-- ✅ Feed de atividades
-- ✅ Sistema de matchmaking para voluntários
-- ✅ Cálculo de impacto ambiental
-- ✅ Rede social verde local
+- ✅ Feed de atividades e eventos
+- ✅ Cálculo de impacto ambiental (lixo coletado, árvores plantadas, área limpa)
+- ✅ Sistema de categorias (Limpeza, Plantio, Monitoramento, Educação)
 
 ## 🛠️ Tecnologias
 

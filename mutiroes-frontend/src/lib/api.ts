@@ -50,7 +50,7 @@ class ApiClient {
       console.log('📤 Enviando requisição...')
       const response = await fetch(url, config)
       console.log('📥 Resposta recebida:', response.status, response.statusText)
-      
+
       const data = await response.json()
       console.log('📊 Dados parseados:', data)
 
@@ -210,34 +210,40 @@ class ApiClient {
     return this.request(`/events/${eventId}/report/`)
   }
 
-  async createEventReport(eventId: number, reportData: {
-    total_participants?: number
-    total_hours?: number
-    trash_collected_kg?: number
-    trees_planted?: number
-    area_cleaned_m2?: number
-    recyclable_material_kg?: number
-    summary?: string
-    challenges?: string
-    achievements?: string
-  }) {
+  async createEventReport(
+    eventId: number,
+    reportData: {
+      total_participants?: number
+      total_hours?: number
+      trash_collected_kg?: number
+      trees_planted?: number
+      area_cleaned_m2?: number
+      recyclable_material_kg?: number
+      summary?: string
+      challenges?: string
+      achievements?: string
+    }
+  ) {
     return this.request(`/events/${eventId}/report/`, {
       method: 'POST',
       body: JSON.stringify(reportData),
     })
   }
 
-  async updateEventReport(eventId: number, reportData: {
-    total_participants?: number
-    total_hours?: number
-    trash_collected_kg?: number
-    trees_planted?: number
-    area_cleaned_m2?: number
-    recyclable_material_kg?: number
-    summary?: string
-    challenges?: string
-    achievements?: string
-  }) {
+  async updateEventReport(
+    eventId: number,
+    reportData: {
+      total_participants?: number
+      total_hours?: number
+      trash_collected_kg?: number
+      trees_planted?: number
+      area_cleaned_m2?: number
+      recyclable_material_kg?: number
+      summary?: string
+      challenges?: string
+      achievements?: string
+    }
+  ) {
     return this.request(`/events/${eventId}/report/`, {
       method: 'PUT',
       body: JSON.stringify(reportData),
@@ -265,16 +271,6 @@ class ApiClient {
     return this.request('/users/stats/')
   }
 
-  async getUserBadges() {
-    return this.request('/users/badges/earned/')
-  }
-
-  async earnBadge(badgeId: number) {
-    return this.request(`/users/badges/earn/${badgeId}/`, {
-      method: 'POST',
-    })
-  }
-
   async getLeaderboard(category?: string) {
     const params = category ? `?category=${category}` : ''
     return this.request(`/users/leaderboard/${params}`)
@@ -283,55 +279,6 @@ class ApiClient {
   async getUserRank(category?: string) {
     const params = category ? `?category=${category}` : ''
     return this.request(`/users/rank/${params}`)
-  }
-
-  // Gamification methods
-  async getBadges() {
-    return this.request('/badges/')
-  }
-
-  async getAchievements() {
-    return this.request('/achievements/')
-  }
-
-  // Notifications methods
-  async getNotifications() {
-    return this.request('/notifications/')
-  }
-
-  async markNotificationRead(id: number) {
-    return this.request(`/notifications/mark-read/${id}/`, {
-      method: 'POST',
-    })
-  }
-
-  async markAllNotificationsRead() {
-    return this.request('/notifications/mark-all-read/', {
-      method: 'POST',
-    })
-  }
-
-  // Geolocation methods
-  async updateLocation(latitude: number, longitude: number, accuracy?: number) {
-    return this.request('/geoprocessing/user-location/', {
-      method: 'POST',
-      body: JSON.stringify({
-        latitude,
-        longitude,
-        accuracy,
-        source: 'gps',
-      }),
-    })
-  }
-
-  async getNearbyEventsByLocation(
-    latitude: number,
-    longitude: number,
-    radius: number = 10
-  ) {
-    return this.request(
-      `/geoprocessing/nearby-events/?latitude=${latitude}&longitude=${longitude}&radius=${radius}`
-    )
   }
 }
 

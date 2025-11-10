@@ -5,26 +5,20 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   MagnifyingGlassIcon,
-  BellIcon,
   UserCircleIcon,
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
 import { useAuth } from '@/contexts/AuthContext'
-import { useNotifications } from '@/hooks/useNotifications'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
-  const { unreadCount, notifications, markAsRead, markAllAsRead } =
-    useNotifications()
 
   const navigation = [
     { name: 'Início', href: '/' },
@@ -71,86 +65,6 @@ export function Header() {
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
-
-            {/* Notifications */}
-            <div className='relative'>
-              <button
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className='relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors duration-200'
-              >
-                <BellIcon className='h-5 w-5' />
-                {unreadCount > 0 && (
-                  <Badge
-                    variant='destructive'
-                    size='sm'
-                    className='absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center p-0'
-                  >
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </Badge>
-                )}
-              </button>
-
-              {/* Notifications Dropdown */}
-              {isNotificationsOpen && (
-                <div className='absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-96 overflow-y-auto'>
-                  <div className='px-4 py-2 border-b border-gray-200 flex justify-between items-center'>
-                    <h3 className='text-sm font-medium text-gray-900'>
-                      Notificações
-                    </h3>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={markAllAsRead}
-                        className='text-xs text-blue-600 hover:text-blue-800'
-                      >
-                        Marcar todas como lidas
-                      </button>
-                    )}
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div className='px-4 py-8 text-center text-gray-500'>
-                      <BellIcon className='h-8 w-8 mx-auto mb-2 text-gray-300' />
-                      <p className='text-sm'>Nenhuma notificação</p>
-                    </div>
-                  ) : (
-                    <div className='py-1'>
-                      {notifications.slice(0, 10).map(notification => (
-                        <button
-                          key={notification.id}
-                          onClick={() => {
-                            markAsRead(notification.id)
-                            setIsNotificationsOpen(false)
-                          }}
-                          className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                            !notification.read
-                              ? 'bg-blue-50 border-l-4 border-blue-500'
-                              : ''
-                          }`}
-                        >
-                          <div className='flex items-start space-x-3'>
-                            <div className='flex-1 min-w-0'>
-                              <p className='text-sm font-medium text-gray-900 truncate'>
-                                {notification.title}
-                              </p>
-                              <p className='text-sm text-gray-600 mt-1 line-clamp-2'>
-                                {notification.body}
-                              </p>
-                              <p className='text-xs text-gray-400 mt-1'>
-                                {new Date(
-                                  notification.created_at
-                                ).toLocaleString('pt-BR')}
-                              </p>
-                            </div>
-                            {!notification.read && (
-                              <div className='w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2'></div>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
 
             {/* User Menu */}
             {isAuthenticated && user ? (

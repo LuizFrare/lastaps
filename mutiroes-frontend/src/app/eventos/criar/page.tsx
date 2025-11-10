@@ -74,16 +74,16 @@ export default function CreateEventPage() {
         const response = await api.getCategories()
         console.log('📦 Resposta recebida:', response)
         console.log('📊 response.data:', response.data)
-        
+
         // A API retorna um objeto com 'results' contendo o array de categorias
-        const categoriesData = Array.isArray(response.data) 
-          ? response.data 
+        const categoriesData = Array.isArray(response.data)
+          ? response.data
           : (response.data as PaginatedResponse<EventCategory>)?.results || []
-        
+
         console.log('✅ Categorias processadas:', categoriesData)
         console.log('✅ Total de categorias:', categoriesData.length)
         setCategories(categoriesData)
-        
+
         if (categoriesData.length === 0) {
           console.warn('⚠️ Nenhuma categoria encontrada')
         } else {
@@ -143,16 +143,19 @@ export default function CreateEventPage() {
       // Adicionar status 'published' para que o evento apareça na listagem
       const eventDataWithStatus = {
         ...eventData,
-        status: 'published'
+        status: 'published',
       }
-      
+
       console.log('📤 Enviando dados do evento:', eventDataWithStatus)
       const response = await api.createEvent(eventDataWithStatus)
       console.log('✅ Evento criado com sucesso:', response)
-      
+
       // Redirecionar para a página do evento criado
       if (response.data && (response.data as any).id) {
-        console.log('🔀 Redirecionando para o evento:', (response.data as any).id)
+        console.log(
+          '🔀 Redirecionando para o evento:',
+          (response.data as any).id
+        )
         // Usar router.push com força de refresh
         router.push(`/eventos/${(response.data as any).id}`)
         router.refresh()
@@ -163,7 +166,9 @@ export default function CreateEventPage() {
       }
     } catch (error) {
       console.error('❌ Error creating event:', error)
-      alert('Erro ao criar evento. Por favor, verifique os dados e tente novamente.')
+      alert(
+        'Erro ao criar evento. Por favor, verifique os dados e tente novamente.'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -252,7 +257,7 @@ export default function CreateEventPage() {
                     ) : (
                       <>
                         <option value=''>Selecione uma categoria</option>
-                        {categories.map((category) => (
+                        {categories.map(category => (
                           <option key={category.id} value={category.id}>
                             {category.name}
                           </option>

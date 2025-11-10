@@ -1,71 +1,98 @@
 version: "3.8"
 
 services:
-  # Backend Django
+  # Backend Django API
   backend:
-    build: ./mutiroes_backend
+    build:
+      context: .
+      dockerfile: ./mutiroes_backend/Dockerfile
+    container_name: mutiroes-backend
     ports:
       - "8000:8000"
     volumes:
       - ./mutiroes_backend:/app
-      - ./mutiroes_backend/media:/app/media
-      - ./mutiroes_backend/staticfiles:/app/staticfiles
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
     environment:
       - DEBUG=True
-      - SECRET_KEY=django-insecure-development-key
+      - SECRET_KEY=django-insecure-development-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend
       - DATABASE_URL=sqlite:///db.sqlite3
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - redis
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Frontend Next.js
-  frontend:
-    build: ./mutiroes-frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./mutiroes-frontend:/app
-      - /app/node_modules
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
-    depends_on:
-      - backend
-
-  # Redis for Celery
+  # Redis - Message Broker & Cache
   redis:
     image: redis:7-alpine
+    container_name: mutiroes-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Celery Worker
-  celery:
-    build: ./mutiroes_backend
+  # Celery Worker - Asynchronous Tasks
+  celery-worker:
+    build:
+      context: .
+      dockerfile: ./mutiroes_backend/Dockerfile
+    container_name: mutiroes-celery-worker
     volumes:
       - ./mutiroes_backend:/app
+      - backend_media:/app/media
     environment:
       - DEBUG=True
-      - SECRET_KEY=django-insecure-development-key
+      - SECRET_KEY=django-insecure-development-key-change-in-production
       - DATABASE_URL=sqlite:///db.sqlite3
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - redis
-    command: celery -A mutiroes_backend worker -l info
+      - backend
+    command: celery -A mutiroes_backend worker -l info --concurrency=2
+    restart: unless-stopped
 
-  # Celery Beat (Scheduler)
+  # Celery Beat - Task Scheduler
   celery-beat:
-    build: ./mutiroes_backend
+    build:
+      context: .
+      dockerfile: ./mutiroes_backend/Dockerfile
+    container_name: mutiroes-celery-beat
     volumes:
       - ./mutiroes_backend:/app
     environment:
       - DEBUG=True
-      - SECRET_KEY=django-insecure-development-key
+      - SECRET_KEY=django-insecure-development-key-change-in-production
       - DATABASE_URL=sqlite:///db.sqlite3
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - redis
-    command: celery -A mutiroes_backend beat -l info
+      - backend
+    command: celery -A mutiroes_backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: unless-stopped
 
 volumes:
   redis_data:
-
-
+    driver: local
+  backend_media:
+    driver: local
+  backend_static:
+    driver: local

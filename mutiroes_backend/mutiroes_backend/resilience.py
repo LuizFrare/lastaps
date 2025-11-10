@@ -19,19 +19,19 @@ logger = logging.getLogger(__name__)
 # Circuit Breakers for external services
 external_api_breaker = CircuitBreaker(
     fail_max=5,
-    timeout_duration=60,
+    reset_timeout=60,
     name='external_api_breaker'
 )
 
 database_breaker = CircuitBreaker(
     fail_max=3,
-    timeout_duration=30,
+    reset_timeout=30,
     name='database_breaker'
 )
 
 redis_breaker = CircuitBreaker(
     fail_max=3,
-    timeout_duration=30,
+    reset_timeout=30,
     name='redis_breaker'
 )
 

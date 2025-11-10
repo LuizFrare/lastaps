@@ -44,8 +44,6 @@ urlpatterns = [
     # App URLs
     path('api/events/', include('events.urls')),
     path('api/users/', include('users.urls')),
-    path('api/notifications/', include('notifications.urls')),
-    path('api/geoprocessing/', include('geoprocessing.urls')),
 ]
 
 # Serve media files in development

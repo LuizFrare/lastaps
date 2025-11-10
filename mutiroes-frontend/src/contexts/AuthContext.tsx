@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileData.user) {
         setUser({
           ...profileData.user,
-          profile: profileData
+          profile: profileData,
         })
       } else {
         setUser(profileData)
@@ -83,12 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Get user profile after successful login
       const profileResponse = await api.getProfile()
       const profileData = profileResponse.data as any
-      
+
       // O backend retorna { user: {...}, ...profile }
       if (profileData.user) {
         setUser({
           ...profileData.user,
-          profile: profileData
+          profile: profileData,
         })
       } else {
         setUser(profileData)
@@ -112,15 +112,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true)
       await api.register(userData)
-      
+
       // Não fazer auto-login, deixar o usuário fazer login manualmente
       // Isso evita problemas com senhas não salvas corretamente
     } catch (error: any) {
       console.error('Registration failed:', error)
-      
+
       // Extrair mensagem de erro específica do backend
       let errorMessage = 'Erro ao criar conta'
-      
+
       if (error.response?.data) {
         const data = error.response.data
         // Se houver erros de campo específicos
@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           errorMessage = data
         }
       }
-      
+
       const enhancedError = new Error(errorMessage)
       throw enhancedError
     } finally {

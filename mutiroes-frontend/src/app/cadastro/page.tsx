@@ -191,8 +191,8 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 placeholder='seuemail@exemplo.com'
                 className='w-full'
-                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                title="Digite um email válido completo (exemplo: usuario@gmail.com)"
+                pattern='[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+                title='Digite um email válido completo (exemplo: usuario@gmail.com)'
               />
               <p className='text-xs text-gray-500 mt-1'>
                 Use um email válido completo (ex: usuario@gmail.com)

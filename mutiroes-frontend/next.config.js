@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
     domains: ['localhost', '127.0.0.1'],
     remotePatterns: [
@@ -13,17 +14,19 @@ const nextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
     if (!apiUrl) {
-      console.warn('NEXT_PUBLIC_API_URL is not defined. API rewrites will not be configured.');
-      return [];
+      console.warn(
+        'NEXT_PUBLIC_API_URL is not defined. API rewrites will not be configured.'
+      )
+      return []
     }
     return [
       {
         source: '/api/:path*',
         destination: `${apiUrl}/:path*`,
       },
-    ];
+    ]
   },
   async headers() {
     return [
@@ -49,5 +52,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-
-

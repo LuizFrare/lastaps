@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 # Remove default config
-RM /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
 
 # Copy custom configuration
 COPY nginx.conf /etc/nginx/conf.d/api-gateway.conf

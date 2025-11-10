@@ -9,7 +9,6 @@ import {
   HeartIcon,
   ShareIcon,
   PhotoIcon,
-  ChatBubbleLeftIcon,
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline'
@@ -83,7 +82,9 @@ export default function EventDetailPage() {
       alert('Check-in realizado com sucesso!')
     } catch (error) {
       console.error('Error checking in:', error)
-      alert('Erro ao fazer check-in. Verifique se você está no local do evento.')
+      alert(
+        'Erro ao fazer check-in. Verifique se você está no local do evento.'
+      )
     }
   }
 
@@ -312,8 +313,7 @@ export default function EventDetailPage() {
                   )}
                   <div>
                     <p className='font-medium'>{event.organizer_name}</p>
-                    <p className='text-sm text-gray-600'>Organizador
-                    </p>
+                    <p className='text-sm text-gray-600'>Organizador</p>
                   </div>
                 </div>
               </CardContent>
@@ -421,10 +421,6 @@ export default function EventDetailPage() {
                 <Button variant='outline' className='w-full justify-start'>
                   <PhotoIcon className='h-4 w-4 mr-2' />
                   Ver Fotos
-                </Button>
-                <Button variant='outline' className='w-full justify-start'>
-                  <ChatBubbleLeftIcon className='h-4 w-4 mr-2' />
-                  Chat do Evento
                 </Button>
                 <Button variant='outline' className='w-full justify-start'>
                   <ShareIcon className='h-4 w-4 mr-2' />

@@ -80,7 +80,7 @@ export function EventReport({ eventId, isOrganizer }: EventReportProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }))
@@ -198,9 +198,7 @@ export function EventReport({ eventId, isOrganizer }: EventReportProps) {
 
           {report.achievements && (
             <div>
-              <h3 className='font-semibold text-gray-900 mb-2'>
-                Conquistas
-              </h3>
+              <h3 className='font-semibold text-gray-900 mb-2'>Conquistas</h3>
               <p className='text-gray-700'>{report.achievements}</p>
             </div>
           )}
@@ -216,7 +214,9 @@ export function EventReport({ eventId, isOrganizer }: EventReportProps) {
             <div className='text-sm text-gray-500 pt-4 border-t'>
               Relatório criado por {report.created_by_name}
               {report.created_at &&
-                ` em ${new Date(report.created_at).toLocaleDateString('pt-BR')}`}
+                ` em ${new Date(report.created_at).toLocaleDateString(
+                  'pt-BR'
+                )}`}
             </div>
           )}
         </CardContent>

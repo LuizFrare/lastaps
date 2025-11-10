@@ -47,8 +47,6 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'events',
     'users',
-    'notifications',
-    'geoprocessing',
 ]
 
 MIDDLEWARE = [
@@ -234,10 +232,6 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(day_of_month=1, hour=3, minute=0),  # First day of month at 3 AM
     },
 }
-
-# Firebase Configuration
-FIREBASE_CREDENTIALS_PATH = config('FIREBASE_CREDENTIALS_PATH', default='')
-FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID', default='')
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
