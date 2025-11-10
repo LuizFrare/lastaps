@@ -432,8 +432,8 @@ export default function EventDetailPage() {
                 <CardTitle className='text-lg'>Ações Rápidas</CardTitle>
               </CardHeader>
               <CardContent className='space-y-2'>
-                <Button 
-                  variant='outline' 
+                <Button
+                  variant='outline'
                   className='w-full justify-start'
                   onClick={handleShare}
                 >
